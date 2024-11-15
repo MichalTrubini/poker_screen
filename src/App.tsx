@@ -17,10 +17,8 @@ type Data = (
 type MergedData = {
   datetime: string;
   nexttime: string;
-  dateOld: string;
-  timeOld: string;
-  dateNew: string;
-  timeNew: string;
+  datepart: string;
+  timepart: string;
   data: [{ set: Data }, { set: Data }];
 };
 
@@ -34,16 +32,10 @@ function App() {
   const [data, setData] = useState<MergedData>({} as MergedData);
   const [isLoading, setIsLoading] = useState(true);
 
-  const prevDatetime = new Date(data.datetime);
-  const currentTime = new Date();
-  const timeDifference = prevDatetime.getTime() - currentTime.getTime();
-
-  // Check if the current time falls within the specified range
-  const isWithinRange = timeDifference <= 5 * 60 * 1000;
 
   const fetchTableData = async () => {
     try {
-      const response = await fetch(locationAPI.za);
+      const response = await fetch(locationAPI.ba);
 
       if (!response.ok) {
         throw new Error(`HTTP error! Status: ${response.status}`);
@@ -59,8 +51,8 @@ function App() {
   useEffect(() => {
     const fetchData = async () => {
       const fetchedData = await fetchTableData();
-      const [datePartOld, timePartOld] = fetchedData.datetime.split(' ');
-      const [datePartNew, timePartNew] = fetchedData.nexttime.split(' ');
+      const [datepart, timepart] = fetchedData.datetime.split(' ');
+
       if (fetchedData) {
         const arraySetOne = fetchedData.data.slice(0, 20);
         const arraySetTwo = fetchedData.data.slice(20, 40);
@@ -68,10 +60,8 @@ function App() {
         const mergedData: MergedData = {
           datetime: fetchedData.datetime,
           nexttime: fetchedData.nexttime,
-          dateOld: datePartOld,
-          timeOld: timePartOld,
-          dateNew: datePartNew,
-          timeNew: timePartNew,
+          datepart: datepart,
+          timepart: timepart,
           data: [{ set: arraySetOne }, { set: arraySetTwo }],
         };
 
@@ -101,8 +91,8 @@ function App() {
   return (
     <div className="w-screen h-screen flex justify-center items-center">
       <div>
-        <h1 className="text-3xl text-center font-bold">{isWithinRange ? data.dateNew : data.dateOld}</h1>
-        <p className="text-2xl mb-8 text-center">{isWithinRange ? data.timeNew : data.timeOld}</p>
+        <h1 className="text-3xl text-center font-bold">{data.datepart}</h1>
+        <p className="text-2xl mb-8 text-center">{data.timepart}</p>
         <div
           className={`flex items-start justify-center ${
             data.data[1].set.length !== 0 ? "gap-10" : ""
